@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menu3D — paper menu to interactive QR menu</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#17121a;--bg2:#221a27;--ink:#f6efe6;--mute:#b5a9b8;--pom:#d6334f;--saf:#f2a33a;--pist:#cfe3b4;--paper:#e9dcc3;--line:rgba(246,239,230,.14);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#17121a}}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 'Instrument Sans',system-ui,sans-serif}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:700;line-height:1.08;margin:0}
+a{color:inherit}button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--saf);outline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font-family:Fraunces,serif;font-size:22px;font-weight:700}.logo b{color:var(--saf)}
+.btn{display:inline-block;border:0;border-radius:999px;padding:14px 24px;font-weight:600;text-decoration:none;background:var(--saf);color:#2a1700}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.hero{padding:40px 0 64px}
+.hero h1{font-size:clamp(38px,7vw,76px);max-width:14ch}
+.hero p{color:var(--mute);max-width:52ch;font-size:18px;margin:20px 0 28px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+section{padding:56px 0}
+section h2{font-size:clamp(28px,4.5vw,44px);max-width:20ch;margin-bottom:12px}
+.sub{color:var(--mute);max-width:56ch;margin:0 0 28px}
+/* transformation */
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center}
+@media(max-width:760px){.stage{grid-template-columns:1fr}}
+.paper{background:var(--paper);color:#3b2f1c;border-radius:6px;padding:22px;font-family:Fraunces,serif;transform:rotate(-1.5deg);box-shadow:0 20px 40px #0008;min-height:300px}
+.paper h4{margin:0 0 8px;text-align:center;letter-spacing:.04em}
+.paper div{display:flex;justify-content:space-between;border-bottom:1px dotted #8a7a5a;padding:5px 0;font-size:15px}
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.step{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+.step.on{background:var(--pist);color:#1c2a10;border-color:var(--pist)}
+/* phone menu */
+.phone{width:min(100%,380px);margin:0 auto;background:#120d15;border:1px solid var(--line);border-radius:36px;padding:10px;box-shadow:0 30px 60px #000a}
+.screen{background:var(--bg2);border-radius:28px;height:640px;overflow:auto;position:relative;scroll-behavior:smooth}
+.mhead{padding:26px 18px 14px;background:linear-gradient(160deg,var(--pom),#6b1530)}
+.mhead .rl{width:46px;height:46px;border-radius:14px;background:var(--saf);display:grid;place-items:center;font:700 20px Fraunces;color:#2a1700}
+.mhead h3{font-size:26px;margin:10px 0 2px}.mhead small{opacity:.85}
+.mtools{position:sticky;top:0;z-index:5;background:var(--bg2);padding:10px 14px 8px;border-bottom:1px solid var(--line)}
+.mtools input{width:100%;border-radius:12px;border:1px solid var(--line);background:#120d15;color:var(--ink);padding:11px 14px;font:inherit}
+.cats{display:flex;gap:8px;overflow-x:auto;padding-top:10px;scrollbar-width:none}
+.cat{white-space:nowrap;border:1px solid var(--line);background:none;border-radius:999px;padding:7px 14px;font-size:14px;transition:.2s}
+.cat.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mlist{padding:6px 14px 80px}.mlist h4{font:700 20px Fraunces;margin:20px 0 10px}
+.card{perspective:700px;margin-bottom:12px}
+.ci{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:#2c2231;border:1px solid var(--line);border-radius:18px;padding:12px;transition:transform .15s ease-out,box-shadow .2s;transform-style:preserve-3d;box-shadow:0 8px 18px #0006}
+.pic{width:76px;height:76px;border-radius:16px;display:grid;place-items:center;font-size:40px;background:radial-gradient(circle at 30% 25%,#5b4560,#2a1f30);transform:translateZ(24px);flex:none}
+.ct{flex:1;min-width:0}.ct b{display:block}.ct span{font-size:13px;color:var(--mute);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr{font-weight:600;color:var(--saf);margin-top:2px}
+.dot{display:inline-block;width:11px;height:11px;border:1.5px solid;border-radius:3px;position:relative;margin-right:6px;vertical-align:-1px}
+.dot:after{content:"";position:absolute;inset:2px;border-radius:50%;background:currentColor}
+.v{color:#3fb55a}.nv{color:#d6334f}
+.bs{font-size:11px;background:var(--saf);color:#2a1700;border-radius:6px;padding:1px 6px;margin-left:6px;font-weight:600}
+.off{opacity:.45}
+.empty{text-align:center;color:var(--mute);padding:40px 10px}
+.modal{position:absolute;inset:0;background:#000a;display:none;align-items:flex-end;z-index:9}
+.modal.open{display:flex}
+.sheet{background:var(--bg2);width:100%;border-radius:26px 26px 0 0;padding:22px;animation:up .3s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.big{height:170px;border-radius:20px;display:grid;place-items:center;font-size:96px;background:radial-gradient(circle at 30% 25%,#6a5070,#2a1f30);margin-bottom:14px;animation:fl 4s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-6px) rotate(3deg)}}
+.x{float:right;background:none;border:1px solid var(--line);border-radius:50%;width:36px;height:36px}
+/* review + qr */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:24px}@media(max-width:760px){.two{grid-template-columns:1fr}}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:22px}
+label{display:block;font-size:13px;color:var(--mute);margin:12px 0 4px}
+.f{width:100%;background:#120d15;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit}
+.flag{border-color:var(--saf);box-shadow:0 0 0 3px #f2a33a33}
+.note{font-size:13px;color:var(--saf);margin-top:4px}.ok{color:var(--pist)}
+#qr{background:#fff;padding:14px;border-radius:14px;display:inline-block}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:760px){.price{grid-template-columns:1fr}}
+.price .panel h3{font-size:30px}.price li{color:var(--mute);margin:6px 0}.price ul{padding-left:18px}
+details{border-bottom:1px solid var(--line);padding:14px 0}summary{cursor:pointer;font-weight:600}details p{color:var(--mute);margin:8px 0 0}
+footer{padding:40px 0;color:var(--mute);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--pist);color:#1c2a10;padding:10px 18px;border-radius:999px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99}.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body>
+<div class="wrap">
+<nav><div class="logo">Menu<b>3D</b></div><a class="btn ghost" href="#demo">View demo</a></nav>
+<header class="hero">
+<h1>Turn your paper menu into an interactive digital experience</h1>
+<p>Upload your existing menu, let AI organize it, and give your customers a beautiful QR-powered digital menu in minutes.</p>
+<div class="cta"><a class="btn" href="#convert">Create your digital menu</a><a class="btn ghost" href="#demo">View demo</a></div>
+</header>
+
+<section id="convert"><h2>Watch a paper menu become a live one</h2>
+<p class="sub">Press the button to run the conversion on a sample page. Anything the AI is unsure about gets flagged for you to check, never guessed.</p>
+<div class="steps" id="steps"></div>
+<div class="stage">
+<div class="paper"><h4>THE ROYAL SPICE</h4><div><span>Paneer Tikka</span><span>249</span></div><div><span>Dal Makhani</span><span>2?9</span></div><div><span>Butter Chicken</span><span>389</span></div><div><span>Garlic Naan</span><span>69</span></div><div><span>Hyderabadi Biryani</span><span>349</span></div><div><span>Gulab Jamun (2)</span><span>129</span></div><div><span>Mango Lassi</span><span>119</span></div></div>
+<div class="panel" id="out"><p class="sub" style="margin:0">Your extracted items will appear here.</p></div>
+</div>
+<div class="row"><button class="btn" id="run">Convert this page</button></div></section>
+
+<section id="review"><h2>Review every item before it goes live</h2>
+<p class="sub">Low-confidence fields are highlighted. Fix them here; the menu publishes only after you confirm.</p>
+<div class="two"><div class="panel">
+<label for="rc">Category</label><input class="f" id="rc" value="Indian Main Course">
+<label for="rn">Dish name</label><input class="f" id="rn" value="Dal Makhani">
+<label for="rd">Description</label><input class="f" id="rd" value="Black lentils slow-cooked overnight with butter and cream">
+<label for="rp">Price (₹)</label><input class="f flag" id="rp" value="2?9" inputmode="numeric">
+<div class="note" id="rnote">The scan is unclear here. Check the printed menu and enter the price.</div>
+<div class="row"><button class="btn" id="save">Confirm item</button></div></div>
+<div class="panel"><h3 style="font-size:24px">Menu-wide checks</h3><p class="sub" id="chk"></p></div></div></section>
+
+<section id="demo"><h2>The Royal Spice, as your customers see it</h2>
+<p class="sub">A live menu: search, jump between categories, tap any dish. Cards tilt toward your finger or cursor, and switch to flat cards on reduced-motion settings.</p>
+<div class="phone"><div class="screen" id="scr">
+<div class="mhead"><div class="rl">R</div><h3>The Royal Spice</h3><small>North Indian &amp; Indo-Chinese · Open until 11 pm</small></div>
+<div class="mtools"><input id="q" type="search" placeholder="Search dishes" aria-label="Search dishes"><div class="cats" id="cats"></div></div>
+<div class="mlist" id="list"></div>
+<div class="modal" id="mod"><div class="sheet" id="sheet"></div></div></div></div></section>
+
+<section><h2>One link, one QR code, every table</h2>
+<p class="sub">Every restaurant gets its own address. Print the code on tables, bills or windows.</p>
+<div class="two"><div class="panel"><div id="qr"></div></div>
+<div class="panel"><label for="url">Public menu link</label><input class="f" id="url" readonly value="https://menu3d.com/menu/the-royal-spice">
+<div class="row"><button class="btn" id="cp">Copy link</button><button class="btn ghost" id="dl">Download PNG</button></div>
+<p class="sub" style="margin-top:16px">Scans this week: 1,284 · Most viewed: Biryani</p></div></div></section>
+
+<section><h2>Simple pricing</h2><p class="sub">Start free. Upgrade when you outgrow one menu.</p>
+<div class="price"><div class="panel"><h3>₹0</h3><b>Starter</b><ul><li>1 menu, 30 dishes</li><li>QR code</li></ul></div>
+<div class="panel"><h3>₹999/mo</h3><b>Restaurant</b><ul><li>Unlimited dishes</li><li>3D cards and branding</li><li>Analytics</li></ul></div>
+<div class="panel"><h3>Custom</h3><b>Chains</b><ul><li>Multiple outlets</li><li>Team access</li></ul></div></div></section>
+
+<section><h2>Questions</h2>
+<details><summary>Does the AI change my prices?</summary><p>No. It reads them, marks anything unclear, and waits for you to confirm.</p></details>
+<details><summary>Do customers need an app?</summary><p>No. The menu opens in the phone browser.</p></details>
+<details><summary>Will it run on cheaper phones?</summary><p>Yes. The 3D effects are light and turn off automatically where they would slow things down.</p></details></section>
+<footer>Menu3D · front-end MVP. Extraction, accounts and storage are mocked behind service interfaces, ready for a backend.</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s),toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* Service abstraction: swap for a real OCR/vision API later */
+const Extractor={async run(onStep){for(const s of ST){onStep(s);await new Promise(r=>setTimeout(r,650))}return[{n:'Paneer Tikka',p:'249',c:1},{n:'Dal Makhani',p:'2?9',c:.41},{n:'Butter Chicken',p:'389',c:.97},{n:'Garlic Naan',p:'69',c:.99},{n:'Hyderabadi Biryani',p:'349',c:.95},{n:'Gulab Jamun (2)',p:'129',c:.93},{n:'Mango Lassi',p:'119',c:.96}]}};
+const ST=['Uploading','Reading menu','Extracting items','Organizing categories','Generating digital menu'];
+$('#steps').innerHTML=ST.map((s,i)=>`<span class="step" data-i="${i}">${s}</span>`).join('');
+$('#run').onclick=async e=>{const b=e.target;b.disabled=true;
+ const items=await Extractor.run(s=>{const i=ST.indexOf(s);document.querySelectorAll('.step').forEach((x,j)=>x.classList.toggle('on',j<=i))});
+ $('#out').innerHTML=items.map(i=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span>${esc(i.n)}</span><span>${i.c<.8?'<span class="note">₹'+esc(i.p)+' · check price</span>':'₹'+esc(i.p)}</span></div>`).join('')+'<p class="note">1 field needs your review.</p><a class="btn" style="margin-top:10px" href="#review">Review items</a>';
+ b.disabled=false;b.textContent='Run again'};
+/* demo data */
+const D=[['Starters',[['Paneer Tikka','Grilled cottage cheese with peppers and onions',249,1,1,'🧀'],['Chicken 65','Crisp curry-leaf fried chicken',279,0,1,'🍗'],['Hara Bhara Kebab','Spinach and pea patties',229,1,0,'🥬']]],
+['Indian Main Course',[['Dal Makhani','Black lentils slow-cooked overnight with butter and cream',289,1,1,'🍲'],['Butter Chicken','Tandoori chicken in tomato-butter gravy',389,0,1,'🍛'],['Palak Paneer','Cottage cheese in spinach gravy',319,1,0,'🥘']]],
+['Chinese',[['Veg Hakka Noodles','Wok-tossed noodles with vegetables',229,1,0,'🍜'],['Chilli Chicken','Dry or gravy, with peppers',299,0,1,'🌶️']]],
+['Breads',[['Garlic Naan','Tandoor-baked with garlic and butter',69,1,0,'🫓'],['Butter Roti','Whole-wheat flatbread',39,1,0,'🫓']]],
+['Rice & Biryani',[['Hyderabadi Biryani','Dum-cooked basmati with spiced chicken',349,0,1,'🍚'],['Veg Dum Biryani','Seasonal vegetables and saffron rice',289,1,0,'🍚']]],
+['Desserts',[['Gulab Jamun (2)','Warm milk dumplings in rose syrup',129,1,1,'🍮'],['Phirni','Chilled ground-rice pudding',119,1,0,'🥣']]],
+['Beverages',[['Mango Lassi','Thick yogurt and Alphonso mango',119,1,1,'🥭'],['Masala Chai','Ginger and cardamom tea',59,1,0,'🍵']]]]
+.map(([c,a])=>({c,i:a.map(([n,d,p,v,b,e])=>({n,d,p,v,b,e,on:!(n==='Phirni')}))}));
+let cat='All';const low=matchMedia('(prefers-reduced-motion:reduce)').matches||(navigator.hardwareConcurrency||8)<=2;
+function cats(){$('#cats').innerHTML=['All',...D.map(x=>x.c)].map(c=>`<button class="cat ${c===cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}
+function render(){const q=$('#q').value.trim().toLowerCase();let h='',n=0;
+ D.forEach(g=>{if(cat!=='All'&&g.c!==cat)return;const m=g.i.filter(i=>!q||(i.n+i.d).toLowerCase().includes(q));if(!m.length)return;n+=m.length;
+ h+=`<h4>${esc(g.c)}</h4>`+m.map(i=>`<div class="card"><button class="ci ${i.on?'':'off'}" data-n="${esc(i.n)}"><div class="pic" aria-hidden="true">${i.e}</div><div class="ct"><b><i class="dot ${i.v?'v':'nv'}" role="img" aria-label="${i.v?'Vegetarian':'Non-vegetarian'}"></i>${esc(i.n)}${i.b?'<span class="bs">Bestseller</span>':''}</b><span>${esc(i.d)}</span><div class="pr">${i.on?'₹'+i.p:'Unavailable today'}</div></div></button></div>`).join('')});
+ $('#list').innerHTML=h||'<div class="empty">No dishes match “'+esc(q)+'”. Try another word or clear the search.</div>'}
+$('#cats').onclick=e=>{const b=e.target.closest('.cat');if(!b)return;cat=b.dataset.c;cats();render();$('#scr').scrollTo({top:150})};
+$('#q').oninput=render;
+$('#list').onclick=e=>{const b=e.target.closest('.ci');if(!b)return;const i=D.flatMap(g=>g.i).find(x=>x.n===b.dataset.n);
+ $('#sheet').innerHTML=`<button class="x" aria-label="Close">✕</button><div class="big" aria-hidden="true">${i.e}</div><h3>${esc(i.n)}</h3><p style="color:var(--mute)"><i class="dot ${i.v?'v':'nv'}"></i>${i.v?'Vegetarian':'Non-vegetarian'}${i.b?' · Bestseller':''}</p><p>${esc(i.d)}</p><div class="pr" style="font-size:22px">${i.on?'₹'+i.p:'Unavailable today'}</div>`;$('#mod').classList.add('open');$('#sheet .x').focus()};
+$('#mod').onclick=e=>{if(e.target.id==='mod'||e.target.closest('.x'))$('#mod').classList.remove('open')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#mod').classList.remove('open')});
+if(!low){$('#list').addEventListener('pointermove',e=>{const b=e.target.closest('.ci');if(!b)return;const r=b.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;b.style.transform=`rotateY(${x*10}deg) rotateX(${-y*10}deg)`});
+ $('#list').addEventListener('pointerleave',()=>document.querySelectorAll('.ci').forEach(b=>b.style.transform=''),true)}
+cats();render();
+/* review */
+function chk(){const p=$('#rp').value.trim(),ok=/^\d+$/.test(p);$('#rp').classList.toggle('flag',!ok);$('#rnote').className=ok?'note ok':'note';$('#rnote').textContent=ok?'Price looks good.':'The scan is unclear here. Check the printed menu and enter the price.';
+ $('#chk').textContent=ok?'All 7 items verified. Ready to publish.':'6 of 7 items verified. 1 price still needs your check.';return ok}
+$('#rp').oninput=chk;chk();
+$('#save').onclick=()=>{if(!chk()||!$('#rn').value.trim())return toast('Enter a valid price first');toast('Item confirmed')};
+/* QR */
+const qr=new QRCode($('#qr'),{text:$('#url').value,width:180,height:180});
+$('#cp').onclick=async()=>{try{await navigator.clipboard.writeText($('#url').value);toast('Link copied')}catch{$('#url').select();toast('Press copy on your keyboard')}};
+$('#dl').onclick=()=>{const c=$('#qr canvas'),img=$('#qr img'),a=document.createElement('a');a.href=c?c.toDataURL('image/png'):img.src;a.download='royal-spice-qr.png';a.click()};
+</script></body></html>
